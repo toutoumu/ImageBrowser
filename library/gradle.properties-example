@@ -1,0 +1,9 @@
+passcodelock.password_preference_key=passcode_lock_prefs_password_key
+passcodelock.password_enc_secret=5-maggio-2002-Karel-Poborsky
+
+ossrhUsername=hello
+ossrhPassword=world
+
+signing.keyId=byebye
+signing.password=secret
+signing.secretKeyRingFile=/home/user/secret.gpg

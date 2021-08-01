@@ -1,0 +1,12 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--android:icon="@drawable/ic_settings_white_24dp"-->
+    <item
+        android:id="@+id/action_all"
+        android:iconTint="@color/title_text_color"
+        android:title="Options"
+        app:showAsAction="ifRoom"
+        />
+</menu>

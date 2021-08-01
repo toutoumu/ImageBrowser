@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="glide_tag_id" type="id" />
+    <item name="toolbar_center_title" type="id" />
+    <item name="toolbar_right_image" type="id" />
+    <item name="toolbar_left_image" type="id" />
+    <item name="toolbar_right_text" type="id" />
+</resources>

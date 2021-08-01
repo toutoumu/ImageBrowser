@@ -1,0 +1,140 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        versionName "1.2.0"
+        // FIXME: 2021/6/28 增加尺寸设置用于保存 CameraApi2 JPEG 图片为 HEIF 格式
+        minSdkVersion 28
+        targetSdkVersion 30
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+    // 数据绑定
+    buildFeatures {
+        viewBinding = true
+    }
+}
+
+dependencies {
+    api 'androidx.legacy:legacy-support-v4:1.0.0'
+    api 'androidx.appcompat:appcompat:1.2.0'
+    api 'androidx.recyclerview:recyclerview:1.1.0'
+    api 'androidx.annotation:annotation:1.2.0'
+    api 'androidx.preference:preference:1.1.1'
+    api 'androidx.viewpager2:viewpager2:1.0.0'
+
+    annotationProcessor 'androidx.annotation:annotation:1.2.0'
+
+    api project(':photoview')
+
+    // 加密
+    implementation 'com.facebook.conceal:conceal:2.0.2@aar'
+
+    // 对话框 https://github.com/kongzue/DialogV3
+    api 'com.kongzue.dialog_v3:dialog:3.2.4'
+
+    // 对话框 https://github.com/afollestad/material-dialogs
+    //implementation 'com.afollestad.material-dialogs:commons:0.9.5.0'
+    /*implementation('com.afollestad.material-dialogs:core:0.9.5.0') {
+        exclude module: "support-v13"
+        exclude module: "appcompat-v7"
+        exclude module: "recyclerview-v7"
+    }*/
+
+    //RxJava https://github.com/ReactiveX/RxJava
+    api 'io.reactivex.rxjava2:rxjava:2.2.21'
+    //RxAndroid https://github.com/ReactiveX/RxAndroid
+    api 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    //    api Libs.utilcode //各种工具类
+    api "com.blankj:utilcodex:1.30.6"
+
+    // 状态栏
+    api "com.gyf.immersionbar:immersionbar:3.0.0"
+    api "com.gyf.immersionbar:immersionbar-components:3.0.0"
+
+    //Glide 3.x
+    //implementation 'com.github.bumptech.glide:glide:3.8.0'
+    //implementation 'jp.wasabeef:glide-transformations:2.0.2'
+
+    // https://www.jianshu.com/p/54bf089d0b04 解决Glide启用过渡时Placeholder变形问题
+    implementation 'com.github.WenHuayu:GlidePlaceholderDrawable:1.0.0'
+    //Glide 4.x https://github.com/bumptech/glide
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    //implementation 'jp.wasabeef:glide-transformations:3.0.1'
+    //implementation 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
+
+    // 图片缩放 https://github.com/chrisbanes/PhotoView
+    // implementation 'com.github.chrisbanes.photoview:library:1.2.4'
+    // implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    // 状态栏颜色 https://github.com/jgilfelt/SystemBarTint
+    implementation 'com.readystatesoftware.systembartint:systembartint:1.0.3'
+
+    // 日志库 https://github.com/JakeWharton/timber
+    //    api Libs.timber
+    api "com.jakewharton.timber:timber:4.7.1"
+    //    api Libs.orhanobutLogger
+    api "com.orhanobut:logger:2.2.0"
+
+    // RxLifeCycle https://github.com/trello/RxLifecycle
+    api 'com.trello.rxlifecycle3:rxlifecycle:3.1.0'
+    api 'com.trello.rxlifecycle3:rxlifecycle-components:3.1.0'
+
+    // https://github.com/Yalantis/uCrop 图片剪切
+    // api 'com.github.yalantis:ucrop:2.2.6'
+    api 'com.github.yalantis:ucrop:2.2.6-native'
+
+
+    //https://github.com/ikew0ng/SwipeBackLayout 侧滑返回 已经下载源代码添加
+    //implementation 'me.imid.swipebacklayout.lib:library:1.1.0'
+
+    // heif图片编码
+    api "androidx.heifwriter:heifwriter:1.0.0"
+    api 'com.drewnoakes:metadata-extractor:2.16.0'
+}
+
+android.buildTypes.all { buildType ->
+    project.properties.any { property ->
+        if (property.key.toLowerCase().startsWith("passcodelock.")) {
+            buildType.buildConfigField "String", property.key.replace("passcodelock.", "").replace(".", "_").toUpperCase(),
+                "\"${property.value}\""
+        }
+    }
+}
+repositories {
+    maven { url 'https://maven.aliyun.com/repository/central' }
+    maven { url 'https://maven.aliyun.com/repository/public' }
+    maven { url 'https://maven.aliyun.com/repository/google' }
+    maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+
+    google()
+    jcenter()
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
+    maven { url 'https://dl.bintray.com/jenly/maven' }
+    maven { url "https://repo.eclipse.org/content/repositories/paho-releases/" }
+
+    flatDir {
+        dirs 'libs'
+    }
+}

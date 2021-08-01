@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!--导航栏透明-->
+        <item name="android:windowTranslucentNavigation">true</item>
+        <!--状态栏透明-->
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+</resources>
