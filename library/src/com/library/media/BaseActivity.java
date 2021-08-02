@@ -3,14 +3,11 @@ package com.library.media;
 import android.graphics.Color;
 import android.os.Build;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
-import me.imid.swipebacklayout.lib.app.SwipeBackActivity;
-import org.wordpress.passcodelock.R;
+import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;
 
-public class BaseActivity extends SwipeBackActivity {
+public class BaseActivity extends RxAppCompatActivity {
     private SystemBarTintManager mTintManager;
     private View mParentView;
 

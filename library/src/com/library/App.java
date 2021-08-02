@@ -2,7 +2,6 @@ package com.library;
 
 import android.app.Application;
 import android.content.Context;
-import android.text.TextUtils;
 import com.blankj.utilcode.util.Utils;
 import com.facebook.soloader.SoLoader;
 import com.kongzue.dialog.util.DialogSettings;
@@ -12,9 +11,6 @@ import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.wordpress.passcodelock.AppLockManager;
-import org.wordpress.passcodelock.BuildConfig;
-import com.library.glide.ConcealUtil;
 import timber.log.Timber;
 
 public class App extends Application {
@@ -40,21 +36,6 @@ public class App extends Application {
 
         //Timber注册
         initLog();
-
-        //初始化程序锁
-        AppLockManager.getInstance().enableDefaultAppLockIfAvailable(this);
-        AppLockManager.getInstance().getAppLock().disable(); // 默认不启用锁
-        AppLockManager.getInstance().getAppLock().setiUnlockLister((success, password) -> {
-            if (success && !TextUtils.isEmpty(password)) {// 密码解锁
-                // isLogin = ConcealUtil.init(App.this, password);
-                isLogin = true;
-            } else { // 指纹解锁
-                isLogin = false;
-                // ConcealUtil.destroy();
-            }
-        });
-
-        ConcealUtil.init(this, "101010");
 
         // 对话框初始化
         initDialogs(this);

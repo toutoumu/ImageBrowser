@@ -3,34 +3,11 @@
     package="org.wordpress.passcodelock"
     android:versionCode="1">
 
-    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application>
-
-        <!--设置页面, 去掉了这个属性不知道有么有问题 android:parentActivityName="freed.SampleActivity"-->
-        <activity
-            android:name="org.wordpress.passcodelock.SamplePreferenceActivity"
-            android:label="@string/action_settings"
-            android:theme="@style/AppTheme">
-        </activity>
-
-        <!-- Passcode Lock Activities -->
-        <activity
-            android:name="org.wordpress.passcodelock.PasscodeManagePasswordActivity"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
-        <!--解锁页面-->
-        <activity
-            android:name="org.wordpress.passcodelock.PasscodeUnlockActivity"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
 
         <activity
             android:name="com.library.media.PictureActivity"
@@ -38,23 +15,6 @@
             android:theme="@style/AppTheme">
         </activity>
 
-
-        <activity
-            android:name="com.library.media.AlbumListActivity"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.library.media.AlbumSelectActivity"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name="com.library.media.CropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeCrop" />
     </application>
 
 </manifest>

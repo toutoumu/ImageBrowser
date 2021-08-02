@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FreeDcam.iml" filepath="$PROJECT_DIR$/FreeDcam.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/FreeDcam.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/FreeDcam.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/library/FreeDcam.library.iml" filepath="$PROJECT_DIR$/.idea/modules/library/FreeDcam.library.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/photoview/FreeDcam.photoview.iml" filepath="$PROJECT_DIR$/.idea/modules/photoview/FreeDcam.photoview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageBrowser.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageBrowser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/ImageBrowser.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/ImageBrowser.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/library/ImageBrowser.library.iml" filepath="$PROJECT_DIR$/.idea/modules/library/ImageBrowser.library.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/photoview/ImageBrowser.photoview.iml" filepath="$PROJECT_DIR$/.idea/modules/photoview/ImageBrowser.photoview.iml" />
     </modules>
   </component>
 </project>

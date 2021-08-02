@@ -1,163 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.troop.freedcam"
-    android:installLocation="auto">
+    package="com.image.browser">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- used on huawei p9/10 and for new devices? -->
-    <uses-permission android:name="android.permission.HW_CAMCFG_SERVICE" />
-    <uses-permission android:name="com.huawei.camera.permission.PRIVATE" />
-    <uses-permission android:name="huawei.android.permission.HW_SIGNATURE_OR_SYSTEM" />
-    <!-- used on huawei p9/10 and for new devices? -->
-
-    <!-- used by sony xperia zX devices? -->
-    <uses-permission android:name="com.sonyericsson.permission.CAMERA_EXTENDED" />
-    <!-- used by sony xperia zX devices? -->
-
-    <!-- used on oneplus5 -->
-    <uses-permission
-        android:name="com.oneplus.camera.CAMERA_SERVICE" />
-    <uses-permission
-        android:name="com.oneplus.camera.PICTURE_PROCESS_SERVICE" />
-    <!-- used on oneplus5 -->
-
-
-    <!-- only for system apps
-    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" /> -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
-    <uses-feature
-        android:name="android.hardware.camera.autofocus"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.sensor.compass"
-        android:required="false" />
-
-
     <application
-        android:name="freed.FreedApplication"
-        android:allowBackup="true"
-        android:excludeFromRecents="true"
-        android:hardwareAccelerated="true"
+        android:name="com.library.App"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="FreeDCam"
-        android:largeHeap="true"
-        android:requestLegacyExternalStorage="true"
-        android:supportsRtl="false"
-        android:theme="@style/FullscreenTheme">
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication">
 
-        <activity
-            android:name="freed.cam.ActivityFreeDcamMain"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|touchscreen|layoutDirection"
-            android:excludeFromRecents="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="FreeDCam"
-            android:screenOrientation="landscape">
-            <!--<intent-filter>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>-->
-        </activity>
-
-        <activity
-            android:name="freed.cam.ActivityFreeDcamMainSecure"
-            android:clearTaskOnLaunch="true"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|touchscreen|layoutDirection"
-            android:excludeFromRecents="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="FreeDCam"
-            android:screenOrientation="landscape"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
-            <intent-filter>
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA_SECURE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.media.action.IMAGE_CAPTURE_SECURE" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="freed.cam.ActivityFreeDcamShare"
-            android:icon="@mipmap/ic_launcher"
-            android:label="FreeDCam"
-            android:screenOrientation="landscape"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
-            <intent-filter>
-                <action android:name="android.media.action.IMAGE_CAPTURE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.media.action.STILL_IMAGE_CAMERA" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="freed.viewer.ActivityFreeDviewer"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|touchscreen|layoutDirection"
-            android:icon="@drawable/launcher_imageviewer"
-            android:label="FreeDCam Viewer"
-            android:taskAffinity="com.freedviewer.GridViewActivity">
-            <intent-filter>
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="com.freedviewer.GridViewActivity" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="freed.viewer.dngconvert.DngConvertingActivity"
-            android:label="GridView">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="freed.viewer.stack.StackActivity"
-            android:label="GridView">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name="freed.viewer.stack.DngStackActivity"
-            android:label="GridView">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
-        <!-- 软件首页 -->
-        <activity
-            android:name="freed.SampleActivity"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            </intent-filter>
-        </activity>
     </application>
+
 </manifest>

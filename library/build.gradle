@@ -7,7 +7,6 @@ android {
 
     defaultConfig {
         versionName "1.2.0"
-        // FIXME: 2021/6/28 增加尺寸设置用于保存 CameraApi2 JPEG 图片为 HEIF 格式
         minSdkVersion 28
         targetSdkVersion 30
     }
@@ -51,14 +50,6 @@ dependencies {
     // 对话框 https://github.com/kongzue/DialogV3
     api 'com.kongzue.dialog_v3:dialog:3.2.4'
 
-    // 对话框 https://github.com/afollestad/material-dialogs
-    //implementation 'com.afollestad.material-dialogs:commons:0.9.5.0'
-    /*implementation('com.afollestad.material-dialogs:core:0.9.5.0') {
-        exclude module: "support-v13"
-        exclude module: "appcompat-v7"
-        exclude module: "recyclerview-v7"
-    }*/
-
     //RxJava https://github.com/ReactiveX/RxJava
     api 'io.reactivex.rxjava2:rxjava:2.2.21'
     //RxAndroid https://github.com/ReactiveX/RxAndroid
@@ -70,10 +61,6 @@ dependencies {
     // 状态栏
     api "com.gyf.immersionbar:immersionbar:3.0.0"
     api "com.gyf.immersionbar:immersionbar-components:3.0.0"
-
-    //Glide 3.x
-    //implementation 'com.github.bumptech.glide:glide:3.8.0'
-    //implementation 'jp.wasabeef:glide-transformations:2.0.2'
 
     // https://www.jianshu.com/p/54bf089d0b04 解决Glide启用过渡时Placeholder变形问题
     implementation 'com.github.WenHuayu:GlidePlaceholderDrawable:1.0.0'
@@ -99,18 +86,6 @@ dependencies {
     // RxLifeCycle https://github.com/trello/RxLifecycle
     api 'com.trello.rxlifecycle3:rxlifecycle:3.1.0'
     api 'com.trello.rxlifecycle3:rxlifecycle-components:3.1.0'
-
-    // https://github.com/Yalantis/uCrop 图片剪切
-    // api 'com.github.yalantis:ucrop:2.2.6'
-    api 'com.github.yalantis:ucrop:2.2.6-native'
-
-
-    //https://github.com/ikew0ng/SwipeBackLayout 侧滑返回 已经下载源代码添加
-    //implementation 'me.imid.swipebacklayout.lib:library:1.1.0'
-
-    // heif图片编码
-    api "androidx.heifwriter:heifwriter:1.0.0"
-    api 'com.drewnoakes:metadata-extractor:2.16.0'
 }
 
 android.buildTypes.all { buildType ->

@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -18,9 +19,15 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.util.Size;
+import android.view.View;
+import android.widget.GridView;
+import android.widget.ImageView;
+import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
 import com.why94.glide.drawable.GlidePlaceholderDrawable;
 import org.jetbrains.annotations.NotNull;
+import org.wordpress.passcodelock.R;
 import timber.log.Timber;
 
 /**
@@ -29,7 +36,7 @@ import timber.log.Timber;
  * 2d平滑变化的显示图片的ImageView
  * 仅限于用于:从一个ScaleType==CENTER_CROP的ImageView，切换到另一个ScaleType=FIT_CENTER的ImageView，或者反之 (当然，得使用同样的图片最好)
  */
-public class SmoothImageView extends androidx.appcompat.widget.AppCompatImageView {
+public class SmoothImageView extends AppCompatImageView {
     private static final int ANIMATION_DURATION = 300;// 动画时长
 
     // 状态
@@ -60,6 +67,7 @@ public class SmoothImageView extends androidx.appcompat.widget.AppCompatImageVie
     private int alpha = 0; // 背景透明度 0 透明 255 不透明
 
     private int duration = ANIMATION_DURATION;
+    private IIndexChanged mIndexChanged;
 
     public void setDuration(int duration) {
         this.duration = duration;
@@ -123,11 +131,14 @@ public class SmoothImageView extends androidx.appcompat.widget.AppCompatImageVie
 
     /**
      * 用于开始进入的方法。 调用此方前，需已经调用过setOriginalInfo
+     *
+     * @param gridView
+     * @param position
+     * @param imageId
+     * @param offset
      */
-    public void transformIn() {
-        if (mTransformData == null) {
-            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
-        }
+    public void transformIn(GridView gridView, int position, @IdRes int imageId, int offset) {
+        setupWithGridView(gridView, position, imageId, offset);
         mState = STATE_TRANSFORM_IN;
         if (mBeforeTransformListener != null) {
             mBeforeTransformListener.onTransformComplete(mState);
@@ -563,6 +574,17 @@ public class SmoothImageView extends androidx.appcompat.widget.AppCompatImageVie
         return mBeforeTransformListener;
     }
 
+    public void setIndexChanged(IIndexChanged indexChanged) {
+        mIndexChanged = indexChanged;
+    }
+
+    public void setCurrentIndex(GridView gridView, int pageIndex, int imageId, int offset) {
+        setupWithGridView(gridView, pageIndex, R.id.image, 0);
+        if (mIndexChanged != null) {
+            mIndexChanged.onIndexChanged(this, pageIndex);
+        }
+    }
+
     /**
      * 变幻
      */
@@ -625,38 +647,25 @@ public class SmoothImageView extends androidx.appcompat.widget.AppCompatImageVie
     }
 
     /**
-     * 计算内容的宽高值,保持原始比例
+     * 计算图片边界
      *
-     * @param content 内容实际宽高
-     * @param container 容器实际宽高
-     * @param contain true: 容器包含内容  false: 内容包含容器
-     * @return 计算后的尺寸, 保持比例
+     * @param gridView {@link GridView}
+     * @param position 当前显示的图片的索引
+     * @param imageViewId 图片对应的id
+     * @param offset Y方向偏移量
      */
-    public static Size calculateContentSize(Size content, Size container, boolean contain) {
-        // 获取裁剪区域的新的宽高
-        float containerScale = (float) container.getWidth() / (float) container.getHeight();// 1
-        float contentScale = (float) content.getWidth() / (float) content.getHeight(); // 2
-
-        float w;
-        float h;
-        // 如果 容器宽高比 > 内容宽高比 那么内容宽度取容器宽度, 内容高度需计算(contentScale = w / h)
-        if (contain) { // 容器包含内容
-            if (containerScale < contentScale) {
-                w = container.getWidth();
-                h = w / contentScale;
-            } else {
-                h = container.getHeight();
-                w = h * contentScale;
+    private void setupWithGridView(GridView gridView, int position, @IdRes int imageViewId, int offset) {
+        int firstVisiblePosition = gridView.getFirstVisiblePosition();
+        View itemView = gridView.getChildAt(position - firstVisiblePosition);
+        Rect bounds = new Rect();
+        if (itemView != null) {
+            ImageView thumbView = itemView.findViewById(imageViewId);
+            thumbView.getGlobalVisibleRect(bounds);
+            if (offset != 0) {
+                bounds.set(bounds.left, bounds.top + offset, bounds.right, bounds.bottom + offset);
             }
-        } else { // 内容包含容器
-            if (containerScale > contentScale) { // 高度超出容器, 宽度等于容器宽度
-                w = container.getWidth();
-                h = w / contentScale;
-            } else { // 内容宽度超出容器,高度等于容器高度
-                h = container.getHeight();
-                w = h * contentScale;
-            }
+            setImageDrawable(thumbView.getDrawable()); // 必须在 setOriginalInfo 之前设置图片
+            setOriginalInfo(bounds.width(), bounds.height(), bounds.left, bounds.top, 0, 0);
         }
-        return new Size((int) w, (int) h);
     }
 }

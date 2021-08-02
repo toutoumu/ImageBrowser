@@ -6,11 +6,8 @@ import android.os.Looper;
 import android.text.TextUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.cache.ExternalCacheDiskCacheFactory;
 import com.bumptech.glide.load.engine.cache.ExternalPreferredCacheDiskCacheFactory;
 import com.kongzue.dialog.v3.TipDialog;
-import com.library.glide.GlideApp;
-import com.trello.rxlifecycle3.android.ActivityEvent;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -103,7 +100,7 @@ public class GlideCacheUtil {
         // clearImageMemoryCache(activity);
         Observable.just("")
             .doOnNext(picture -> {
-                GlideApp.get(activity).clearDiskCache();
+                Glide.get(activity).clearDiskCache();
                 String ImageExternalCatchDir =
                     activity.getExternalCacheDir() + ExternalPreferredCacheDiskCacheFactory.DEFAULT_DISK_CACHE_DIR;
                 deleteFolderFile(ImageExternalCatchDir, true);
@@ -111,11 +108,11 @@ public class GlideCacheUtil {
             .subscribeOn(Schedulers.io())// 指定在这行代码之前的subscribe在io线程执行
             .observeOn(AndroidSchedulers.mainThread())//指定这行代码之后的subscribe在io线程执行
             .subscribe(picture -> {//图片处理完成后的回调
-                GlideApp.get(activity).clearMemory();
-                TipDialog.show((AppCompatActivity) activity, "缓存清除成功！", TipDialog.TYPE.SUCCESS).setCancelable(true);
+                Glide.get(activity).clearMemory();
+                TipDialog.show(activity, "缓存清除成功！", TipDialog.TYPE.SUCCESS).setCancelable(true);
             }, throwable -> {
                 Timber.e(throwable);
-                TipDialog.show((AppCompatActivity) activity, "缓存清除失败！", TipDialog.TYPE.ERROR);
+                TipDialog.show(activity, "缓存清除失败！", TipDialog.TYPE.ERROR);
             });
     }
 }
