@@ -18,16 +18,13 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
-import android.util.Size;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ImageView;
 import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
-import com.why94.glide.drawable.GlidePlaceholderDrawable;
 import org.jetbrains.annotations.NotNull;
-import org.wordpress.passcodelock.R;
 import timber.log.Timber;
 
 /**
@@ -230,10 +227,10 @@ public class SmoothImageView extends AppCompatImageView {
                 ColorDrawable colorDrawable = (ColorDrawable) drawable;
                 mBitmapWidth = colorDrawable.getIntrinsicWidth();
                 mBitmapHeight = colorDrawable.getIntrinsicHeight();
-            } else if (drawable instanceof GlidePlaceholderDrawable) { // placeholder 为自定义的
+            } /*else if (drawable instanceof GlidePlaceholderDrawable) { // placeholder 为自定义的
                 mBitmapWidth = drawable.getMinimumWidth();
                 mBitmapHeight = drawable.getMinimumHeight();
-            } else if (drawable instanceof NinePatchDrawable) {// placeholder 为 .9 图
+            }*/ else if (drawable instanceof NinePatchDrawable) {// placeholder 为 .9 图
                 mBitmapWidth = drawable.getIntrinsicWidth();
                 mBitmapHeight = drawable.getIntrinsicHeight();
             } else {
@@ -576,7 +573,7 @@ public class SmoothImageView extends AppCompatImageView {
     }
 
     public void setCurrentIndex(GridView gridView, int pageIndex, int imageId, int offset) {
-        setupWithGridView(gridView, pageIndex, R.id.image, 0);
+        setupWithGridView(gridView, pageIndex, imageId, 0);
         if (mIndexChanged != null) {
             mIndexChanged.onIndexChanged(this, pageIndex);
         }

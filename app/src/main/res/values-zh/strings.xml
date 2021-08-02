@@ -1,0 +1,15 @@
+<resources>
+
+    <!-- Strings for the Settings interface -->
+    <string name="app_name">图片浏览器示例</string>
+
+    <string name="action_select">选择模式</string>
+    <string name="action_scan">浏览模式</string>
+    <string name="action_delete">删除选中项</string>
+    <string name="action_select_all">全选</string>
+    <string name="action_unselect_all">全不选</string>
+    <string name="action_export">导出</string>
+    <string name="action_move">移动到</string>
+
+
+</resources>

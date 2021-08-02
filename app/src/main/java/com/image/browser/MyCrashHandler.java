@@ -1,4 +1,4 @@
-package com.library;
+package com.image.browser;
 
 import android.text.TextUtils;
 import com.blankj.utilcode.util.AppUtils;
@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
-import org.wordpress.passcodelock.R;
 import timber.log.Timber;
 
 public class MyCrashHandler implements Thread.UncaughtExceptionHandler {

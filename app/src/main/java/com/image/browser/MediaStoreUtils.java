@@ -1,4 +1,4 @@
-package com.library;
+package com.image.browser;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;

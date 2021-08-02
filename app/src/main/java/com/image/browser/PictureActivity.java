@@ -1,4 +1,4 @@
-package com.library.media;
+package com.image.browser;
 
 import android.annotation.SuppressLint;
 import android.graphics.PorterDuff;
@@ -29,6 +29,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.gyf.immersionbar.BarHide;
 import com.gyf.immersionbar.ImmersionBar;
+import com.image.browser.databinding.ActivityPictureBinding;
 import com.kongzue.dialog.v3.BottomMenu;
 import com.kongzue.dialog.v3.MessageDialog;
 import com.kongzue.dialog.v3.TipDialog;
@@ -43,8 +44,6 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.wordpress.passcodelock.R;
-import org.wordpress.passcodelock.databinding.ActivityPictureBinding;
 import timber.log.Timber;
 
 /**

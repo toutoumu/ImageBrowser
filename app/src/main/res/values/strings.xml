@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">My Application</string>
+
+    <string name="action_select">selectMode</string>
+    <string name="action_scan">scanModel</string>
+    <string name="action_delete">deleteSelected</string>
+    <string name="action_select_all">selectAll</string>
+    <string name="action_unselect_all">unselect</string>
+    <string name="action_export">export</string>
+    <string name="action_move">move</string>
 </resources>

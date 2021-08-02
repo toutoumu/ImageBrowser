@@ -1,4 +1,4 @@
-package com.library.media;
+package com.image.browser;
 
 import java.io.Serializable;
 import java.util.Objects;

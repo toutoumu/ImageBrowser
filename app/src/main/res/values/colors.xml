@@ -7,4 +7,52 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+
+    <!-- Colors for the Settings interface -->
+    <color name="accent">#000000</color>
+    <color name="primary">#000000</color>
+    <color name="primary_dark">#000000</color>
+
+    <color name="title_text_color">#e6e6e6</color>
+    <color name="textColorPrimary">#e6e6e6</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="light_gray">#E5E5E5</color>
+    <color name="gray">#CCC</color>
+    <color name="list_row_selected">#78c8e6</color>
+    <color name="red">#ff0000</color>
+
+
+    <!-- Colors for customizing the Passcode Lock interface -->
+    <color name="passcodelock_background">@color/primary</color>
+    <color name="passcodelock_button_background_color">@android:color/transparent</color>
+    <color name="passcodelock_button_text_color">@color/black</color>
+    <color name="passcodelock_field_background_color">@color/white</color>
+    <color name="passcodelock_field_hint_text_color">#5f5f5f</color>
+    <color name="passcodelock_field_text_color">@color/primary</color>
+    <color name="passcodelock_prompt_text_color">#e6e6e6</color>
+
+    <!--覆盖裁剪页面颜色-->
+    <!--状态栏颜色-->
+    <color name="ucrop_color_statusbar">@color/transparent</color>
+    <!--导航栏颜色-->
+    <color name="ucrop_color_toolbar">@color/transparent</color>
+    <!--下部分操作区域背景色-->
+    <color name="ucrop_color_widget_background">@color/transparent</color>
+    <!--按钮颜色-->
+    <color name="ucrop_color_widget">@color/title_text_color</color>
+
+    <!--按钮图标和文字激活后的颜色-->
+    <color name="ucrop_color_widget_active">#FF6300</color>
+    <!--<color name="ucrop_color_widget_text">@color/title_text_color</color>-->
+    <!--裁剪图片未加载时显示默认图片-->
+    <color name="ucrop_color_default_logo">@color/title_text_color</color>
+
+    <!--裁剪区域与屏幕边框距离-->
+    <dimen name="ucrop_padding_crop_frame">0dp</dimen>
+    <!--底部滚轮高度-->
+    <dimen name="ucrop_height_wrapper_controls">88dp</dimen>
+    <!--底部按钮的高度-->
+    <dimen name="ucrop_height_wrapper_states">68dp</dimen>
 </resources>

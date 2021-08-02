@@ -40,7 +40,7 @@
         android:required="false" />
 
     <application
-        android:name="com.library.App"
+        android:name="com.image.browser.App"
         android:allowBackup="true"
         android:excludeFromRecents="true"
         android:hardwareAccelerated="true"

@@ -1,20 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.wordpress.passcodelock"
+    package="com.image.browser.library"
     android:versionCode="1">
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <application>
-
-        <activity
-            android:name="com.library.media.PictureActivity"
-            android:configChanges="orientation|screenSize"
-            android:theme="@style/AppTheme">
-        </activity>
-
-    </application>
-
 </manifest>

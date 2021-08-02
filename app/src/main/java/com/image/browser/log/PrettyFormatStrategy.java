@@ -1,4 +1,4 @@
-package com.library.log;
+package com.image.browser.log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -7,7 +7,7 @@ import com.orhanobut.logger.LogStrategy;
 import com.orhanobut.logger.LogcatLogStrategy;
 import com.orhanobut.logger.Logger;
 
-import static com.library.log.Utils.checkNotNull;
+import static com.image.browser.log.Utils.checkNotNull;
 
 /**
  * Draws borders around the given log message along with additional information such as :

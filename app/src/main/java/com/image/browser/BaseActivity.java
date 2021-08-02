@@ -1,4 +1,4 @@
-package com.library.media;
+package com.image.browser;
 
 import android.graphics.Color;
 import android.os.Build;

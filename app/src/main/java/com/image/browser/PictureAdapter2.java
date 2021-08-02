@@ -1,4 +1,4 @@
-package com.library.media;
+package com.image.browser;
 
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -16,7 +16,6 @@ import com.bumptech.glide.request.target.Target;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.library.widget.DragFrameLayout;
 import java.util.List;
-import org.wordpress.passcodelock.R;
 
 public class PictureAdapter2 extends RecyclerView.Adapter<PictureAdapter2.HorizontalVpViewHolder> {
     private final List<Picture> pictures;

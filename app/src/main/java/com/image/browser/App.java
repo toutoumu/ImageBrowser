@@ -1,11 +1,11 @@
-package com.library;
+package com.image.browser;
 
 import android.app.Application;
 import android.content.Context;
 import com.blankj.utilcode.util.Utils;
 import com.kongzue.dialog.util.DialogSettings;
 import com.kongzue.dialog.v3.Notification;
-import com.library.log.PrettyFormatStrategy;
+import com.image.browser.log.PrettyFormatStrategy;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;

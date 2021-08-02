@@ -1,4 +1,4 @@
-package com.library.media;
+package com.image.browser;
 
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -14,7 +14,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.library.widget.ProgressImageView;
 import java.util.List;
-import org.wordpress.passcodelock.R;
 
 public class PictureListAdapter extends BaseAdapter {
 

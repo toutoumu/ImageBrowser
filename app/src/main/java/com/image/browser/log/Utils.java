@@ -1,4 +1,4 @@
-package com.library.log;
+package com.image.browser.log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

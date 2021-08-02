@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.image.browser.databinding.ActivityMainBinding
 import com.kongzue.dialog.v3.TipDialog
 import com.kongzue.dialog.v3.TipDialog.TYPE.WARNING
-import com.library.media.PictureActivity
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions

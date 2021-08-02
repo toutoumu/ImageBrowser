@@ -1,10 +1,9 @@
-package com.library.media;
+package com.image.browser;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
-import org.wordpress.passcodelock.R;
 
 public class SquareRelativeLayout extends RelativeLayout {
     public static final int HORIZONTAL = 0;
