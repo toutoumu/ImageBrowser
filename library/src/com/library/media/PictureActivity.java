@@ -616,9 +616,6 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
                 for (int i = 0; i < 10000; i++) {
                     Picture picture = new Picture();
                     picture.setSelected(false);
-                    picture.setAlbumName("albumName");
-                    picture.setFileName("fileName");
-                    // picture.setFilePath(path + File.separator + fileName);
                     picture.setFilePath(getRandomImage("图片" + i));
                     pictures.add(picture);
                 }

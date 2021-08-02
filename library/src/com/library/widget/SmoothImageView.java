@@ -31,10 +31,7 @@ import org.wordpress.passcodelock.R;
 import timber.log.Timber;
 
 /**
- * https://blog.csdn.net/lonelyroamer/article/details/25497737
- *
- * 2d平滑变化的显示图片的ImageView
- * 仅限于用于:从一个ScaleType==CENTER_CROP的ImageView，切换到另一个ScaleType=FIT_CENTER的ImageView，或者反之 (当然，得使用同样的图片最好)
+ * 平滑变化的显示图片的ImageView
  */
 public class SmoothImageView extends AppCompatImageView {
     private static final int ANIMATION_DURATION = 300;// 动画时长

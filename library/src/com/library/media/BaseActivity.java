@@ -4,12 +4,9 @@ import android.graphics.Color;
 import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
-import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;
 
 public class BaseActivity extends RxAppCompatActivity {
-    private SystemBarTintManager mTintManager;
-    private View mParentView;
 
     /**
      * 这里不会隐藏底部导航栏

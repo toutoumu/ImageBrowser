@@ -3,7 +3,6 @@ package com.library;
 import android.app.Application;
 import android.content.Context;
 import com.blankj.utilcode.util.Utils;
-import com.facebook.soloader.SoLoader;
 import com.kongzue.dialog.util.DialogSettings;
 import com.kongzue.dialog.v3.Notification;
 import com.library.log.PrettyFormatStrategy;
@@ -14,8 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
 public class App extends Application {
-    // 默认为登录状态
-    private static boolean isLogin = true;
     private static Application sApplication;
 
     @Override
@@ -30,9 +27,6 @@ public class App extends Application {
 
         // 工具方法类初始化
         Utils.init(this);
-
-        // 加载conceal的so文件
-        SoLoader.init(this, false);
 
         //Timber注册
         initLog();
@@ -82,20 +76,6 @@ public class App extends Application {
                 Logger.log(priority, tag, message, t);
             }
         });
-    }
-
-    /**
-     * 是否已经登录
-     */
-    public static boolean isLogin() {
-        return isLogin;
-    }
-
-    /**
-     * 设置是否已经登录
-     */
-    public static void setLogin(boolean login) {
-        isLogin = login;
     }
 
     public static Application getAppContext() {

@@ -37,15 +37,11 @@ dependencies {
     api 'androidx.appcompat:appcompat:1.2.0'
     api 'androidx.recyclerview:recyclerview:1.1.0'
     api 'androidx.annotation:annotation:1.2.0'
-    api 'androidx.preference:preference:1.1.1'
     api 'androidx.viewpager2:viewpager2:1.0.0'
 
     annotationProcessor 'androidx.annotation:annotation:1.2.0'
 
     api project(':photoview')
-
-    // 加密
-    implementation 'com.facebook.conceal:conceal:2.0.2@aar'
 
     // 对话框 https://github.com/kongzue/DialogV3
     api 'com.kongzue.dialog_v3:dialog:3.2.4'
@@ -55,7 +51,7 @@ dependencies {
     //RxAndroid https://github.com/ReactiveX/RxAndroid
     api 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
-    //    api Libs.utilcode //各种工具类
+    //各种工具类
     api "com.blankj:utilcodex:1.30.6"
 
     // 状态栏
