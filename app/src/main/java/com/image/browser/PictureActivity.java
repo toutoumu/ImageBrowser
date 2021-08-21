@@ -134,6 +134,9 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             .dontTransform()
             .encodeQuality(80);
 
+        bind.dragLayout.setContainer(bind.pager);
+        bind.dragLayout.setImageView(bind.smoothImageView);
+
         // 加载文件
         loadData();
 
@@ -210,7 +213,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
 
         // 动画开始之前的回调
         bind.smoothImageView.setOnBeforeTransformListener(mode -> {
-            gridClickable = false;
+            gridClickable = false;// 动画开始了不允许点击
             bind.pager.setVisibility(View.INVISIBLE);
             bind.smoothImageView.setVisibility(View.VISIBLE);
             switch (mode) {

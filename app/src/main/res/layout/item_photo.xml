@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.library.widget.DragFrameLayout
+<!--<com.library.widget.DragFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drag_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    >
+    >-->
 
-    <com.github.chrisbanes.photoview.PhotoView
-        android:id="@+id/photo_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-</com.library.widget.DragFrameLayout>
+<com.github.chrisbanes.photoview.PhotoView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/photo_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    />
+    <!--</com.library.widget.DragFrameLayout>-->

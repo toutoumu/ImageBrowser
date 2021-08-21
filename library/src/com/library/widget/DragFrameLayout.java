@@ -125,6 +125,8 @@ public class DragFrameLayout extends FrameLayout {
             if (mImageView.getBeforeTransformListener() != null) {
                 mImageView.getBeforeTransformListener().onTransformComplete(STATE_TRANSFORM_MOVE);
             }
+            mImageView.setVisibility(VISIBLE);
+            mContainer.setVisibility(INVISIBLE);
             getParent().requestDisallowInterceptTouchEvent(true);
             Timber.e("%s -- ACTION_MOVE -- 触发滚动事件 %s %s", methodName, transformX, transformY);
         }
@@ -135,7 +137,7 @@ public class DragFrameLayout extends FrameLayout {
             return false;
         }
 
-        float scale = 1.0f - Math.abs(transformY) / (getWidth() / 1.0f);
+        float scale = 1.0f - Math.abs(transformY) / getWidth();
         int alpha = (int) (255.0f * (1.0f - Math.abs(transformY) / (getWidth() / 4.0f)));
         // [0, 255]
         alpha = Math.max(alpha, 0);
@@ -145,8 +147,8 @@ public class DragFrameLayout extends FrameLayout {
         scale = Math.max(scale, 0.7f);
         scale = Math.min(scale, 1.0f);
 
-        mImageView.setVisibility(VISIBLE);
-        mContainer.setVisibility(INVISIBLE);
+        // mImageView.setVisibility(VISIBLE);
+        // mContainer.setVisibility(INVISIBLE);
         mImageView.transformMove(scale, alpha, transformX, transformY, sx, sy);
         /*Timber.e("%s ACTION_MOVE -- 手指移动: %s 透明度: %s x偏移: %s y偏移: %s",
                  methodName,
@@ -186,12 +188,12 @@ public class DragFrameLayout extends FrameLayout {
                 Timber.e("onTouchEvent -- ACTION_UP -- 滑动速度 %s", yVelocity);
 
                 // 根据滑动速度计算动画时间,速度越快时间越短
-                if (mHide) {
+                /*if (mHide) {
                     int duration = (int) Math.abs((300 * 1000 / yVelocity));
                     duration = Math.min(duration, 300);
                     duration = Math.max(duration, 150);
                     mImageView.setDuration(duration);
-                }
+                }*/
             }
         }
         recycleVelocityTracker();

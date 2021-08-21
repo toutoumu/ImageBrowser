@@ -19,21 +19,29 @@
         android:verticalSpacing="1dp"
         />
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/pager"
+    <com.library.widget.DragFrameLayout
+        android:id="@+id/drag_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
-        android:orientation="horizontal"
-        android:visibility="invisible"
-        />
+        android:orientation="vertical"
+        >
 
-    <com.library.widget.SmoothImageView
-        android:id="@+id/smoothImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-        />
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            />
+
+        <com.library.widget.SmoothImageView
+            android:id="@+id/smoothImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            />
+    </com.library.widget.DragFrameLayout>
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

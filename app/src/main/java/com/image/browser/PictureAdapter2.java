@@ -14,7 +14,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.library.widget.DragFrameLayout;
 import java.util.List;
 
 public class PictureAdapter2 extends RecyclerView.Adapter<PictureAdapter2.HorizontalVpViewHolder> {
@@ -42,9 +41,6 @@ public class PictureAdapter2 extends RecyclerView.Adapter<PictureAdapter2.Horizo
 
     @Override
     public void onBindViewHolder(@NonNull HorizontalVpViewHolder holder, int position) {
-        holder.mDragFrameLayout.setContainer(mActivity.bind.pager);
-        holder.mDragFrameLayout.setImageView(mActivity.bind.smoothImageView);
-
         holder.mPhotoView.setMaximumScale(10);
         holder.mPhotoView.setMediumScale(4);
         holder.mPhotoView.setOnViewTapListener((view, x, y) -> mActivity.toggleUI());
@@ -56,7 +52,8 @@ public class PictureAdapter2 extends RecyclerView.Adapter<PictureAdapter2.Horizo
 
         // 加载图片
         holder.mPhotoView.setLoading(true);
-        mActivity.mGlideRequests.load(pictures.get(position).getFilePath())
+        mActivity.mGlideRequests
+            .load(pictures.get(position).getFilePath())
             .thumbnail(thumbnailRequest)
             // 必须设置占位图, 否则缩略图,未加载之前(imageView没有设置图片之前),无法拖动
             .placeholder(R.drawable.transparent_drawable)
@@ -92,12 +89,12 @@ public class PictureAdapter2 extends RecyclerView.Adapter<PictureAdapter2.Horizo
     }
 
     static class HorizontalVpViewHolder extends RecyclerView.ViewHolder {
-        DragFrameLayout mDragFrameLayout;
+        // DragFrameLayout mDragFrameLayout;
         PhotoView mPhotoView;
 
         HorizontalVpViewHolder(@NonNull View itemView) {
             super(itemView);
-            mDragFrameLayout = itemView.findViewById(R.id.drag_layout);
+            // mDragFrameLayout = itemView.findViewById(R.id.drag_layout);
             mPhotoView = itemView.findViewById(R.id.photo_view);
         }
     }

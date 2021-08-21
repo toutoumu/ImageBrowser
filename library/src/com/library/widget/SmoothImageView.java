@@ -19,6 +19,7 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.GridView;
 import android.widget.ImageView;
 import androidx.annotation.IdRes;
@@ -443,7 +444,7 @@ public class SmoothImageView extends AppCompatImageView {
         ValueAnimator valueAnimator = new ValueAnimator();
         valueAnimator.setDuration(duration);
         // valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator()); // 加速减速
-        // valueAnimator.setInterpolator(new DecelerateInterpolator()); // 减速
+        valueAnimator.setInterpolator(new DecelerateInterpolator(2.0f)); // 减速
         if (state == STATE_TRANSFORM_IN) {// 显示
             PropertyValuesHolder scaleHolder =
                 PropertyValuesHolder.ofFloat("scale", mTransformData.startScale, mTransformData.endScale);
