@@ -389,7 +389,7 @@ public class SmoothImageView extends AppCompatImageView {
         }
 
         // 圆环尺寸
-        float size = 200;// Math.min(rect.width, rect.height);
+        float size = 100;// Math.min(rect.width, rect.height);
 
         RectF oval;
         if (mTransformData != null) {

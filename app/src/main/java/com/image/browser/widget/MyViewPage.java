@@ -1,4 +1,4 @@
-package com.image.browser;
+package com.image.browser.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;

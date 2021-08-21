@@ -92,7 +92,7 @@ public class PhotoView extends AppCompatImageView {
     private void drawLoading(Canvas canvas) {
         if (!isLoading) {return;}
 
-        float size = 200;// Math.min(rect.width, rect.height);
+        float size = 100;// Math.min(rect.width, rect.height);
 
         float left = (getMeasuredWidth() - size) / 2.0f;
         float top = (getMeasuredHeight() - size) / 2.0f;

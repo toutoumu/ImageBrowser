@@ -1,9 +1,10 @@
-package com.image.browser;
+package com.image.browser.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
+import com.image.browser.R;
 
 public class SquareRelativeLayout extends RelativeLayout {
     public static final int HORIZONTAL = 0;
