@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import timber.log.Timber;
@@ -19,7 +20,9 @@ public class DragFrameLayout extends FrameLayout {
     /** onFling 操作的阈值,绝对值越大速度越大 */
     private static final int VELOCITY_Y = 100;
 
-    private View mContainer; // 容器
+    private int viewType = 0; // 0: 网格 1: 图片浏览
+    private View mListView;
+    private View mViewPager; // 容器
     private SmoothImageView mImageView; // 图片
 
     private float mStartX; // 按下位置
@@ -27,10 +30,17 @@ public class DragFrameLayout extends FrameLayout {
     private float sx = 0f; // 按下是的位置(中心位置为0.5)
     private float sy = 0f; // 按下是的位置(中心位置为0.5)
 
-    private boolean mHide; // 滑动结束后是否隐藏
+    private boolean mHide = false; // 滑动结束后是否隐藏
     private boolean mIsTransform = false; // 是否正在移动
 
     private VelocityTracker mVelocityTracker; // 滑动速度监听
+
+    private SmoothImageView.TransformListener mTransformListener;
+    private SmoothImageView.TransformListener mBeforeTransformListener;
+
+    public int getViewType() {
+        return viewType;
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -98,8 +108,7 @@ public class DragFrameLayout extends FrameLayout {
         // 注意 onInterceptTouchEvent 是 return mIsTransform;
         // onTouchEvent 返回的是 if (mIsTransform || mHide) { return true; } return super.onTouchEvent(event);
 
-        if (mIsTransform || mHide) { return true; }
-        return false;
+        return mIsTransform || mHide;
     }
 
     /**
@@ -125,8 +134,8 @@ public class DragFrameLayout extends FrameLayout {
             if (mImageView.getBeforeTransformListener() != null) {
                 mImageView.getBeforeTransformListener().onTransformComplete(STATE_TRANSFORM_MOVE);
             }
-            mImageView.setVisibility(VISIBLE);
-            mContainer.setVisibility(INVISIBLE);
+            // mImageView.setVisibility(VISIBLE);
+            // mContainer.setVisibility(INVISIBLE);
             getParent().requestDisallowInterceptTouchEvent(true);
             Timber.e("%s -- ACTION_MOVE -- 触发滚动事件 %s %s", methodName, transformX, transformY);
         }
@@ -260,35 +269,86 @@ public class DragFrameLayout extends FrameLayout {
     /**
      * 过渡动画使用的View
      *
-     * @return {@link SmoothImageView}
-     */
-    public SmoothImageView getImageView() {
-        return mImageView;
-    }
-
-    /**
-     * 过渡动画使用的View
-     *
      * @param imageView {@link SmoothImageView}
      */
     public void setImageView(SmoothImageView imageView) {
         mImageView = imageView;
+        mImageView.setOnBeforeTransformListener(mode -> {
+            mListView.setEnabled(false);
+            mViewPager.setVisibility(View.INVISIBLE);
+            mImageView.setVisibility(View.VISIBLE);
+            switch (mode) {
+                case SmoothImageView.STATE_TRANSFORM_IN: { // 显示图片浏览器
+                    Timber.e("------------显示 [图片浏览器] 之前------------");
+                    viewType = 1; // 0: 网格 1: 图片浏览
+                    break;
+                }
+                case SmoothImageView.STATE_TRANSFORM_OUT: { // 显示网格列表
+                    Timber.e("------------显示 [网格列表] 之前------------");
+                    viewType = 0; // 0: 网格 1: 图片浏览
+                    break;
+                }
+                case SmoothImageView.STATE_TRANSFORM_RESTORE: { // 恢复到图片浏览器
+                    Timber.e("------------恢复到 [图片浏览器] 之前------------");
+                    viewType = 1; // 0: 网格 1: 图片浏览
+                    break;
+                }
+                case STATE_TRANSFORM_MOVE: {
+                    Timber.e("------------开始 [拖动] 之前------------");
+                    break;
+                }
+            }
+            if (mBeforeTransformListener != null) {mBeforeTransformListener.onTransformComplete(mode);}
+        });
+
+        mImageView.setOnTransformListener(mode -> {
+            mListView.setEnabled(true);
+            // 各种动画之后都需要隐藏, 过渡动画的图片, 否则会挡住其他
+            mImageView.setVisibility(View.INVISIBLE);
+            switch (mode) {
+                case SmoothImageView.STATE_TRANSFORM_IN: { // 显示图片浏览器之后,显示单张浏览
+                    Timber.e("------------显示  [图片浏览器] ------------");
+                    mViewPager.setVisibility(View.VISIBLE);
+                    break;
+                }
+                case SmoothImageView.STATE_TRANSFORM_OUT: { // 显示网格列表
+                    Timber.e("------------显示 [网格列表] ------------");
+                    mViewPager.setVisibility(View.INVISIBLE);
+                    break;
+                }
+                case SmoothImageView.STATE_TRANSFORM_RESTORE: { // 恢复到原来昨天
+                    Timber.e("------------恢复到 [图片浏览器] ------------");
+                    mViewPager.setVisibility(View.VISIBLE);
+                }
+            }
+            if (mTransformListener != null) {mTransformListener.onTransformComplete(mode);}
+        });
+    }
+
+    /**
+     * 网格图片列表
+     *
+     * @param listView .
+     */
+    public void setListView(View listView) {
+        mListView = listView;
     }
 
     /**
      * 图片浏览器
      *
-     * @param container 一般指 ViewPage
+     * @param viewPager 一般指 ViewPage
      */
-    public void setContainer(View container) {
-        mContainer = container;
+    public void setViewPager(View viewPager) {
+        mViewPager = viewPager;
     }
 
-    /**
-     * 图片浏览器 一般指 ViewPage
-     */
-    public View getContainer() {
-        return mContainer;
+    public void setTransformListener(SmoothImageView.TransformListener transformListener) {
+        mTransformListener = transformListener;
+    }
+
+    public void setBeforeTransformListener(SmoothImageView.TransformListener beforeTransformListener) {
+        mBeforeTransformListener = beforeTransformListener;
     }
 
     public DragFrameLayout(@NonNull Context context) {

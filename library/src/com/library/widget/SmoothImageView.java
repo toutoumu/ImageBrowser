@@ -20,11 +20,14 @@ import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.GridView;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
@@ -42,18 +45,18 @@ public class SmoothImageView extends AppCompatImageView {
     public static final int STATE_TRANSFORM_RESTORE = 4;// 恢复
 
     private int mState = STATE_NORMAL; // 当前状态
-    private boolean mTransformStart = false; // 是否正在变幻
+    private boolean mTransformStart = false; // 是否需要执行变换动画
 
     // 缩略图控件的 frame 属性
-    private int mOriginalWidth; // 缩略图View宽度
-    private int mOriginalHeight; // 缩略图View高度
+    private int mOriginalWidth; // 缩略图View宽度(在GridView,或者RecyclerView等列表中展示宽度)
+    private int mOriginalHeight; // 缩略图View高度(在GridView,或者RecyclerView等列表中展示高度)
     private int mOriginalLocationX; // 缩略图偏移X
-    private int mOriginalLocationY; // 缩略图偏移Y
-    private int mBitmapWidth; // 图片的宽度(如果图片比例不是1:1那么与mOriginalWidth可能不一样)
-    private int mBitmapHeight; // 图片的高度(如果图片比例不是1:1那么与mOriginalHeight可能不一样)
+    private int mOriginalLocationY; // 缩略图偏移Y(一般是状态栏标题栏的高度)
+    private int mBitmapWidth; // 当前设置的图片的真实宽度(如果图片比例不是1:1那么与mOriginalWidth可能不一样,显示在ImageView中可能被压缩,或者拉伸了)
+    private int mBitmapHeight; // 当前设置的图片的真实高度(如果图片比例不是1:1那么与mOriginalHeight可能不一样,显示在ImageView中可能被压缩,或者拉伸了)
 
-    private Paint mPaint; // 画笔
-    private Paint mProgressPaint; // 画笔
+    private Paint mPaint; // 背景画笔
+    private Paint mProgressPaint; // loading画笔
     private Matrix mSmoothMatrix;
     private Transform mTransformData; // 变幻数据
     private TransformListener mTransformListener;
@@ -62,7 +65,6 @@ public class SmoothImageView extends AppCompatImageView {
     private int alpha = 0; // 背景透明度 0 透明 255 不透明
 
     private int duration = ANIMATION_DURATION;
-    private IIndexChanged mIndexChanged;
 
     public void setDuration(int duration) {
         this.duration = duration;
@@ -92,6 +94,15 @@ public class SmoothImageView extends AppCompatImageView {
         mProgressPaint = new Paint();
         mProgressPaint.setColor(Color.DKGRAY);
         mProgressPaint.setStyle(Style.STROKE);
+    }
+
+    /**
+     * @param bounds {@link Rect} 图片在屏幕上的位置, 可使用{@link #getBounds(AdapterView, int, int)} ,{@link #getBounds(LinearLayoutManager, int, int)}获取
+     * @param offsetX x方向偏移量
+     * @param offsetY y方向的偏移量(一般指的是状态栏+ 标题栏)
+     */
+    public void setOriginalInfo(Rect bounds, int offsetX, int offsetY) {
+        setOriginalInfo(bounds.width(), bounds.height(), bounds.left, bounds.top, offsetX, offsetY);
     }
 
     /**
@@ -125,19 +136,82 @@ public class SmoothImageView extends AppCompatImageView {
     }
 
     /**
-     * 用于开始进入的方法。 调用此方前，需已经调用过setOriginalInfo
+     * 用于开始进入的方法。
+     * 注: 从 View 或者 ImageView 打开图片浏览器, 这里必须包含 ImageView 并指定其 ID
      *
-     * @param gridView
-     * @param position
-     * @param imageId
-     * @param offset
+     * @param view {@link View} 必须是 ImageView 或者包含 ImageView
+     * @param imageId 图片ID 必须是 view 参数中 ImageView 的 ID
+     * @param offsetX 偏移
+     * @param offsetY 偏移
      */
-    public void transformIn(GridView gridView, int position, @IdRes int imageId, int offset) {
-        setupWithGridView(gridView, position, imageId, offset);
-        mState = STATE_TRANSFORM_IN;
-        if (mBeforeTransformListener != null) {
-            mBeforeTransformListener.onTransformComplete(mState);
+    public void transformIn(View view, @IdRes int imageId, int offsetX, int offsetY) {
+        if (mTransformData == null) {
+            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
         }
+        setupWith(view, imageId, offsetX, offsetY);
+        if (mBeforeTransformListener != null) {
+            mBeforeTransformListener.onTransformComplete(STATE_TRANSFORM_IN);
+        }
+        mState = STATE_TRANSFORM_IN;
+        mTransformStart = true;
+        invalidate();
+    }
+
+    /**
+     * 用于开始进入的方法。
+     *
+     * @param gridView 点击的图片列表
+     * @param position 点击的图片在列表中的索引
+     * @param imageId 点击的图片对应的ID
+     * @param offsetX 偏移
+     * @param offsetY 偏移
+     */
+    public void transformIn(AdapterView<?> gridView, int position, @IdRes int imageId, int offsetX, int offsetY) {
+        if (mTransformData == null) {
+            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
+        }
+        setupWith(gridView, position, imageId, offsetX, offsetY);
+        if (mBeforeTransformListener != null) {
+            mBeforeTransformListener.onTransformComplete(STATE_TRANSFORM_IN);
+        }
+        mState = STATE_TRANSFORM_IN;
+        mTransformStart = true;
+        invalidate();
+    }
+
+    /**
+     * 用于开始进入的方法。
+     *
+     * @param layoutManager 点击的图片列表
+     * @param position 点击的图片在列表中的索引
+     * @param imageId 点击的图片对应的ID
+     * @param offsetX 偏移
+     * @param offsetY 偏移
+     */
+    public void transformIn(LinearLayoutManager layoutManager, int position, @IdRes int imageId, int offsetX, int offsetY) {
+        if (mTransformData == null) {
+            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
+        }
+        setupWith(layoutManager, position, imageId, offsetX, offsetY);
+        if (mBeforeTransformListener != null) {
+            mBeforeTransformListener.onTransformComplete(STATE_TRANSFORM_IN);
+        }
+        mState = STATE_TRANSFORM_IN;
+        mTransformStart = true;
+        invalidate();
+    }
+
+    /**
+     * 用于开始进入的方法。
+     */
+    public void transformIn() {
+        if (mTransformData == null) {
+            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
+        }
+        if (mBeforeTransformListener != null) {
+            mBeforeTransformListener.onTransformComplete(STATE_TRANSFORM_IN);
+        }
+        mState = STATE_TRANSFORM_IN;
         mTransformStart = true;
         invalidate();
     }
@@ -149,12 +223,27 @@ public class SmoothImageView extends AppCompatImageView {
         if (mTransformData == null) {
             throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
         }
-        mState = STATE_TRANSFORM_OUT;
         if (mBeforeTransformListener != null) {
-            mBeforeTransformListener.onTransformComplete(mState);
+            mBeforeTransformListener.onTransformComplete(STATE_TRANSFORM_OUT);
         }
+        mState = STATE_TRANSFORM_OUT;
         mTransformStart = true;
         invalidate();
+    }
+
+    /**
+     * 移动后还原
+     */
+    void transformRestore() {
+        if (mTransformData == null) {
+            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
+        }
+        mState = STATE_TRANSFORM_RESTORE;
+        if (mBeforeTransformListener != null) {
+            mBeforeTransformListener.onTransformComplete(STATE_TRANSFORM_RESTORE);
+        }
+        mTransformStart = true;
+        startTransform(STATE_TRANSFORM_RESTORE);
     }
 
     /**
@@ -171,16 +260,16 @@ public class SmoothImageView extends AppCompatImageView {
         if (mTransformData == null) {
             throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
         }
-        mState = STATE_TRANSFORM_MOVE; // 更新状态
-        mTransformStart = false; // 不执行动画
+        this.mState = STATE_TRANSFORM_MOVE; // 更新状态
+        this.mTransformStart = false; // 不执行动画
         this.alpha = alpha; // 更新透明度
 
-        // 计算并缓存此次拖动的,缩放,偏移,尺寸等信息
-        float currentScale = scale * mTransformData.endScale; // 图片的实际缩放值(小图会被拉伸到填充屏幕)
-        float targetWidth = mBitmapWidth * currentScale;// 本次移动图片最终的宽度
-        float targetHeight = mBitmapHeight * currentScale;// 本次移动图片最终的宽度
+        // 计算并缓存此次拖动后的,缩放,偏移,尺寸等信息
+        float targetScale = scale * mTransformData.endScale; // 图片的实际缩放值(小图会被拉伸到填充屏幕)
+        float targetWidth = mBitmapWidth * targetScale;// 本次移动图片最终的宽度
+        float targetHeight = mBitmapHeight * targetScale;// 本次移动图片最终的宽度
 
-        mTransformData.scale = currentScale;
+        mTransformData.scale = targetScale;
         mTransformData.rect.width = targetWidth;
         mTransformData.rect.height = targetHeight;
         mTransformData.rect.left =
@@ -188,22 +277,7 @@ public class SmoothImageView extends AppCompatImageView {
         mTransformData.rect.top =
             transformY + (getHeight() - targetHeight) / 2.0f + (mTransformData.endRect.height - targetHeight) * (sy - 0.5f);
 
-        invalidate();
-    }
-
-    /**
-     * 移动后还原
-     */
-    public void transformRestore() {
-        if (mTransformData == null) {
-            throw new NullPointerException("请先调用 setOriginalInfo 进行初始化");
-        }
-        mState = STATE_TRANSFORM_RESTORE;
-        if (mBeforeTransformListener != null) {
-            mBeforeTransformListener.onTransformComplete(mState);
-        }
-        mTransformStart = true;
-        startTransform(STATE_TRANSFORM_RESTORE);
+        this.invalidate();
     }
 
     /**
@@ -218,8 +292,8 @@ public class SmoothImageView extends AppCompatImageView {
                 mBitmapWidth = 200;
                 mBitmapHeight = 200;
             } else if (drawable instanceof TransitionDrawable) {// 貌似是Glide加载的图片就这样
-                mBitmapWidth = ((TransitionDrawable) drawable).getCurrent().getIntrinsicWidth();
-                mBitmapHeight = ((TransitionDrawable) drawable).getCurrent().getIntrinsicHeight();
+                mBitmapWidth = drawable.getCurrent().getIntrinsicWidth();
+                mBitmapHeight = drawable.getCurrent().getIntrinsicHeight();
             } else if (drawable instanceof BitmapDrawable) {
                 Bitmap mBitmap = ((BitmapDrawable) drawable).getBitmap();
                 mBitmapWidth = mBitmap.getWidth();
@@ -284,25 +358,14 @@ public class SmoothImageView extends AppCompatImageView {
         mTransformData.rect = new LocationSizeF();
     }
 
-    public void setState(int state) {
-        mState = state;
-    }
-
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
         super.setImageDrawable(drawable);
-        // todo 这里图片已经加载了,根据 Drawable 不同来处理页面的变幻数据
-        // if (drawable instanceof BitmapDrawable) {
         mBitmapWidth = 0;
         mBitmapHeight = 0;
         mTransformData = null;
         mSmoothMatrix = new Matrix();
         this.initTransform();
-    }
-
-    @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
     }
 
     @Override
@@ -381,7 +444,7 @@ public class SmoothImageView extends AppCompatImageView {
     }
 
     private boolean isLoading = false;
-    int startAngle = 0;
+    private int startAngle = 0;
     float ringWidth = 50.0f;
 
     private void drawLoading(Canvas canvas) {
@@ -552,7 +615,7 @@ public class SmoothImageView extends AppCompatImageView {
      *
      * @param listener .
      */
-    public void setOnTransformListener(TransformListener listener) {
+    void setOnTransformListener(TransformListener listener) {
         mTransformListener = listener;
     }
 
@@ -561,23 +624,12 @@ public class SmoothImageView extends AppCompatImageView {
      *
      * @param listener .
      */
-    public void setOnBeforeTransformListener(TransformListener listener) {
+    void setOnBeforeTransformListener(TransformListener listener) {
         mBeforeTransformListener = listener;
     }
 
     public TransformListener getBeforeTransformListener() {
         return mBeforeTransformListener;
-    }
-
-    public void setIndexChanged(IIndexChanged indexChanged) {
-        mIndexChanged = indexChanged;
-    }
-
-    public void setCurrentIndex(GridView gridView, int pageIndex, int imageId, int offset) {
-        setupWithGridView(gridView, pageIndex, imageId, 0);
-        if (mIndexChanged != null) {
-            mIndexChanged.onIndexChanged(this, pageIndex);
-        }
     }
 
     /**
@@ -644,23 +696,128 @@ public class SmoothImageView extends AppCompatImageView {
     /**
      * 计算图片边界
      *
-     * @param gridView {@link GridView}
+     * @param gridView {@link AdapterView}
      * @param position 当前显示的图片的索引
      * @param imageViewId 图片对应的id
-     * @param offset Y方向偏移量
+     * @param offsetX X方向偏移量
+     * @param offsetY Y方向偏移量
      */
-    private void setupWithGridView(GridView gridView, int position, @IdRes int imageViewId, int offset) {
+    private void setupWith(AdapterView<?> gridView, int position, @IdRes int imageViewId, int offsetX, int offsetY) {
         int firstVisiblePosition = gridView.getFirstVisiblePosition();
         View itemView = gridView.getChildAt(position - firstVisiblePosition);
         Rect bounds = new Rect();
         if (itemView != null) {
             ImageView thumbView = itemView.findViewById(imageViewId);
             thumbView.getGlobalVisibleRect(bounds);
-            if (offset != 0) {
-                bounds.set(bounds.left, bounds.top + offset, bounds.right, bounds.bottom + offset);
+            if (offsetX != 0 || offsetY != 0) {
+                bounds.set(bounds.left + offsetX,
+                           bounds.top + offsetY,
+                           bounds.right + offsetX,
+                           bounds.bottom + offsetY);
             }
             setImageDrawable(thumbView.getDrawable()); // 必须在 setOriginalInfo 之前设置图片
-            setOriginalInfo(bounds.width(), bounds.height(), bounds.left, bounds.top, 0, 0);
+            setOriginalInfo(bounds, offsetX, offsetY);
         }
+    }
+
+    /**
+     * 计算图片边界
+     *
+     * @param manager {@link LinearLayoutManager}
+     * @param position 当前显示的图片的索引
+     * @param resId 图片对应的id
+     * @param offsetX X方向偏移量
+     * @param offsetY Y方向偏移量
+     */
+    private void setupWith(LinearLayoutManager manager, int position, @IdRes int resId, int offsetX, int offsetY) {
+        Rect bounds = new Rect();
+        View itemView = manager.findViewByPosition(position);
+        if (itemView != null) {
+            ImageView thumbView = itemView.findViewById(resId);
+            thumbView.getGlobalVisibleRect(bounds);
+            if (offsetX != 0 || offsetY != 0) {
+                bounds.set(bounds.left + offsetX,
+                           bounds.top + offsetY,
+                           bounds.right + offsetX,
+                           bounds.bottom + offsetY);
+            }
+            setImageDrawable(thumbView.getDrawable()); // 必须在 setOriginalInfo 之前设置图片
+            setOriginalInfo(bounds, offsetX, offsetY);
+        }
+    }
+
+    /**
+     * 计算图片边界
+     *
+     * @param view {@link View}
+     * @param resId 图片对应的id
+     * @param offsetX X方向偏移量
+     * @param offsetY Y方向偏移量
+     */
+    private void setupWith(View view, @IdRes int resId, int offsetX, int offsetY) {
+        Rect bounds = new Rect();
+        if (view != null) {
+            ImageView thumbView = view.findViewById(resId);
+            thumbView.getGlobalVisibleRect(bounds);
+            if (offsetX != 0 || offsetY != 0) {
+                bounds.set(bounds.left + offsetX,
+                           bounds.top + offsetY,
+                           bounds.right + offsetX,
+                           bounds.bottom + offsetY);
+            }
+            setImageDrawable(thumbView.getDrawable()); // 必须在 setOriginalInfo 之前设置图片
+            setOriginalInfo(bounds, offsetX, offsetY);
+        }
+    }
+
+    /**
+     * 获取边界值
+     *
+     * @param gridView {@link AbsListView}
+     * @param position 当前显示的图片的索引
+     * @param resId 图片对应的id
+     * @return {@link Rect} 边界值
+     */
+    public static Rect getBounds(AdapterView<?> gridView, int position, @IdRes int resId) {
+        int firstVisiblePosition = gridView.getFirstVisiblePosition();
+        View itemView = gridView.getChildAt(position - firstVisiblePosition);
+        Rect bounds = new Rect();
+        if (itemView != null) {
+            ImageView thumbView = itemView.findViewById(resId);
+            thumbView.getGlobalVisibleRect(bounds);
+        }
+        return bounds;
+    }
+
+    /**
+     * 获取边界值
+     *
+     * @param manager {@link GridLayoutManager}
+     * @param position 当前显示的图片的索引
+     * @param resId 图片对应的id
+     * @return {@link Rect} 边界值
+     */
+    public static Rect getBounds(LinearLayoutManager manager, int position, @IdRes int resId) {
+        Rect bounds = new Rect();
+        View itemView = manager.findViewByPosition(position);
+        if (itemView != null) {
+            ImageView thumbView = itemView.findViewById(resId);
+            thumbView.getGlobalVisibleRect(bounds);
+        }
+        return bounds;
+    }
+
+    /**
+     * 获取边界值
+     *
+     * @param itemView {@link View}
+     * @return {@link Rect} 边界值
+     */
+    public static Rect getBounds(View itemView) {
+        Rect bounds = new Rect();
+        if (itemView != null) {
+            itemView.getGlobalVisibleRect(bounds);
+        }
+        return bounds;
     }
 }

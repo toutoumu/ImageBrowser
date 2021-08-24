@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.blankj.utilcode.util.Utils;
 import com.kongzue.dialog.util.DialogSettings;
+import com.kongzue.dialog.util.TextInfo;
 import com.kongzue.dialog.v3.Notification;
 import com.image.browser.log.PrettyFormatStrategy;
 import com.orhanobut.logger.AndroidLogAdapter;
@@ -42,14 +43,14 @@ public class App extends Application {
      */
     private static void initDialogs(Context context) {
         DialogSettings.init();
-        // DialogSettings.checkRenderscriptSupport(context);
-        // DialogSettings.isUseBlur = true;
+        DialogSettings.checkRenderscriptSupport(context);
+        DialogSettings.isUseBlur = true;
         DialogSettings.DEBUGMODE = true;
         DialogSettings.autoShowInputKeyboard = true;
         Notification.mode = Notification.Mode.FLOATING_WINDOW;
-        //DialogSettings.backgroundColor = Color.BLUE;
-        //DialogSettings.titleTextInfo = new TextInfo().setFontSize(50);
-        //DialogSettings.buttonPositiveTextInfo = new TextInfo().setFontColor(Color.GREEN);
+        // DialogSettings.backgroundColor = Color.BLUE;
+        // DialogSettings.titleTextInfo = new TextInfo().setFontSize(50);
+        // DialogSettings.buttonPositiveTextInfo = new TextInfo().setFontColor(Color.GREEN);
         DialogSettings.style = DialogSettings.STYLE.STYLE_IOS;
         DialogSettings.theme = DialogSettings.THEME.LIGHT;
     }

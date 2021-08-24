@@ -2,13 +2,12 @@ package com.image.browser;
 
 import android.annotation.SuppressLint;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -35,13 +34,13 @@ import com.kongzue.dialog.v3.MessageDialog;
 import com.kongzue.dialog.v3.TipDialog;
 import com.kongzue.dialog.v3.WaitDialog;
 import com.library.widget.SmoothImageView;
-import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.trello.rxlifecycle3.android.ActivityEvent;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import timber.log.Timber;
@@ -61,13 +60,12 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
     private PictureAdapter2 mPictureAdapter;
     private PictureListAdapter mPictureListAdapter;
 
-    private int viewType = 0; // 0: 网格 1: 图片浏览
     private int mPageIndex = 0; // 当前页索引
 
     private TipDialog mProgressDialog;
-    private SystemBarTintManager tintManager;
     public ActivityPictureBinding bind;
 
+    // 注意这里的缩略图, 图片列表, 和SmoothImageView都是使用这个图片,也就是缩略图,和过渡动画使用同一个大小的图片,以保证可以在缩略图加载的同时也加载过渡图片
     RequestOptions mThumbnailRequestOptions;
     RequestManager mGlideRequests;
 
@@ -78,7 +76,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             onBackPressed();
         } else if (itemId == R.id.action_all) {
             BottomMenu.show(
-                this, new String[] { "全选", "全不选", "选择模式", "浏览模式", "处理选择项" }, (text, index) -> {
+                this, new String[] { "全选", "全不选", "选择模式", "浏览模式", "删除选择项" }, (text, index) -> {
                     switch (text) {
                         case "全选": {
                             this.changeSelectMode(true, true);
@@ -96,7 +94,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
                             this.changeSelectMode(true, false);
                             break;
                         }
-                        case "处理选择项": {
+                        case "删除选择项": {
                             handlerSelected();
                             break;
                         }
@@ -110,8 +108,6 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        tintManager = new SystemBarTintManager(this);
-
         bind = ActivityPictureBinding.inflate(getLayoutInflater());
         setContentView(bind.getRoot());
 
@@ -121,7 +117,6 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
         ImmersionBar.with(this).reset()
             .fullScreen(false)
             .hideBar(BarHide.FLAG_SHOW_BAR)
-            // .navigationBarEnable(false)
             .init();
 
         mGlideRequests = Glide.with(this);
@@ -134,7 +129,8 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             .dontTransform()
             .encodeQuality(80);
 
-        bind.dragLayout.setContainer(bind.pager);
+        bind.dragLayout.setListView(bind.gridView);
+        bind.dragLayout.setViewPager(bind.pager);
         bind.dragLayout.setImageView(bind.smoothImageView);
 
         // 加载文件
@@ -165,7 +161,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             changeSelectMode(false, false);
             return;
         }
-        if (viewType == 1) {// 切换到网格视图
+        if (bind.dragLayout.getViewType() == 1) {// 切换到网格视图
             bind.smoothImageView.transformOut();
             return;
         }
@@ -177,72 +173,23 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
      * 初始化点击事件
      */
     private void initListeners() {
-        // 页面改变时回调
-        bind.smoothImageView.setIndexChanged((imageView, position) -> {
-            if (mPictures.isEmpty() || position < 0 || position > mPictures.size() - 1) {
-                return;
-            }
-
-            // 更新 smoothImageView 显示的图片
-            imageView.setLoading(true);
-            mGlideRequests.load(mPictures.get(position).getFilePath())
-                .apply(mThumbnailRequestOptions)
-                .error(R.drawable.ic_default_image_list)
-                .listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e,
-                                                Object model,
-                                                Target<Drawable> target,
-                                                boolean isFirstResource) {
-                        imageView.setLoading(false);
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(Drawable resource,
-                                                   Object model,
-                                                   Target<Drawable> target,
-                                                   DataSource dataSource,
-                                                   boolean isFirstResource) {
-                        imageView.setLoading(false);
-                        return false;
-                    }
-                })
-                .into(imageView);
-        });
-
         // 动画开始之前的回调
-        bind.smoothImageView.setOnBeforeTransformListener(mode -> {
-            gridClickable = false;// 动画开始了不允许点击
-            bind.pager.setVisibility(View.INVISIBLE);
-            bind.smoothImageView.setVisibility(View.VISIBLE);
+        bind.dragLayout.setBeforeTransformListener(mode -> {
             switch (mode) {
-                case SmoothImageView.STATE_TRANSFORM_IN: { // 显示图片浏览器
-                    Timber.e("------------显示图片浏览器之前------------");
-                    viewType = 1; // 0: 网格 1: 图片浏览
+                case SmoothImageView.STATE_TRANSFORM_IN: // 恢复到图片浏览器
+                case SmoothImageView.STATE_TRANSFORM_RESTORE: { // 显示图片浏览器
                     toolbarInAnimation();
                     footerInAnimation();
                     renderView();
                     break;
                 }
                 case SmoothImageView.STATE_TRANSFORM_OUT: { // 显示网格列表
-                    Timber.e("------------显示网格列表之前------------");
-                    viewType = 0; // 0: 网格 1: 图片浏览
                     toolbarInAnimation();
                     footerOutAnimation();
                     renderView();
                     break;
                 }
-                case SmoothImageView.STATE_TRANSFORM_RESTORE: { // 恢复到图片浏览器
-                    Timber.e("------------恢复到图片浏览器之前------------");
-                    viewType = 1; // 0: 网格 1: 图片浏览
-                    toolbarInAnimation();
-                    footerInAnimation();
-                    renderView();
-                    break;
-                }
                 case SmoothImageView.STATE_TRANSFORM_MOVE: {
-                    Timber.e("------------开始拖动之前------------");
                     toolBarOutAnimation();
                     footerOutAnimation();
                     break;
@@ -251,8 +198,8 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
         });
 
         // 动画结束之后的回调
-        bind.smoothImageView.setOnTransformListener(mode -> {
-            gridClickable = true;
+        /*
+        bind.dragLayout.setTransformListener(mode -> {
             bind.smoothImageView.setVisibility(View.INVISIBLE);
             switch (mode) {
                 case SmoothImageView.STATE_TRANSFORM_IN: { // 显示图片浏览器
@@ -271,10 +218,11 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
                 }
             }
         });
+        */
 
         // 左下角返回相册
         bind.showAlbum.setOnClickListener(view12 -> {
-            if (viewType == 1) {
+            if (bind.dragLayout.getViewType() == 1) {
                 this.onBackPressed();
             }
         });
@@ -316,7 +264,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 Timber.e("onPageSelected position: %s", position);
-                if (position != 0 && position > mPictures.size() - 1) {
+                if (position > mPictures.size() - 1) {
                     Timber.e("position 超出了 mPictrues.size");
                     return;
                 }
@@ -324,13 +272,40 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
                 bind.gridView.smoothScrollToPosition(mPageIndex);
                 renderView();
 
-                bind.smoothImageView.setCurrentIndex(bind.gridView, mPageIndex, R.id.image, 0);
+                // 更新当前图片缩略图的位置信息
+                Rect bounds = SmoothImageView.getBounds(bind.gridView, position, R.id.image);
+                bind.smoothImageView.setOriginalInfo(bounds, 0, 0);
+
+                // 更新 smoothImageView 显示的图片
+                bind.smoothImageView.setLoading(true);
+                mGlideRequests.load(mPictures.get(position).getFilePath())
+                    .apply(mThumbnailRequestOptions)
+                    .error(R.drawable.ic_default_image_list)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e,
+                                                    Object model,
+                                                    Target<Drawable> target,
+                                                    boolean isFirstResource) {
+                            bind.smoothImageView.setLoading(false);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource,
+                                                       Object model,
+                                                       Target<Drawable> target,
+                                                       DataSource dataSource,
+                                                       boolean isFirstResource) {
+                            bind.smoothImageView.setLoading(false);
+                            return false;
+                        }
+                    })
+                    .into(bind.smoothImageView);
             }
         });
         bind.pager.setCurrentItem(mPageIndex, false);
     }
-
-    private boolean gridClickable = true;
 
     /**
      * 初始化图片网格
@@ -363,14 +338,20 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
                 return;
             }
 
-            // 如果GridView不可点击
-            if (!gridClickable) {
-                return;
-            }
-
             bind.pager.setCurrentItem(position, false);
+
             // 打开图片浏览
-            bind.smoothImageView.transformIn(bind.gridView, position, R.id.image, 0);
+            ImageView imageView = view.findViewById(R.id.image);
+            Rect bounds = SmoothImageView.getBounds(view);
+            bind.smoothImageView.setImageDrawable(imageView.getDrawable());
+            bind.smoothImageView.setOriginalInfo(bounds, 0, 0);
+            bind.smoothImageView.transformIn();
+
+            // 打开图片浏览
+            // bind.smoothImageView.transformIn(view, R.id.image, 0, 0);
+
+            // 打开图片浏览
+            // bind.smoothImageView.transformIn(bind.gridView, position, R.id.image, 0, 0);
         });
 
         bind.gridView.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -379,9 +360,9 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
         });
 
         bind.gridView.setPadding(0,
-                                 tintManager.getConfig().getStatusBarHeight() + tintManager.getConfig().getActionBarHeight(),
+                                 ImmersionBar.getStatusBarHeight(this) + ImmersionBar.getActionBarHeight(this),
                                  0,
-                                 tintManager.getConfig().getNavigationBarHeight());
+                                 ImmersionBar.getNavigationBarHeight(this));
     }
 
     /**
@@ -416,7 +397,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
         // 设置标题栏的Margin属性,给状态栏留出空间
         ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) bind.toolbar.getLayoutParams();
         params.setMargins(params.leftMargin,
-                          tintManager.getConfig().getStatusBarHeight(),
+                          ImmersionBar.getStatusBarHeight(this),
                           params.rightMargin,
                           params.bottomMargin);
     }
@@ -425,11 +406,10 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
      * 显示列表操作
      */
     private void showAction() {
-        BottomMenu.show(this, new String[] { "编辑", "保存到相册" }, (text, index) -> {
+        BottomMenu.show(this, new String[] { "删除", "保存到相册" }, (text, index) -> {
             switch (text) {
-
-                case "编辑": {
-                    TipDialog.show(this, "编辑!", TipDialog.TYPE.SUCCESS);
+                case "删除": {
+                    handlerCurrent();
                     break;
                 }
                 case "保存到相册": {
@@ -446,7 +426,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
      * @param selectMode bool 是否选择模式
      * @param selectAll bool 是否全选,或者全不选 ture:全选 false:全不选
      */
-    public void changeSelectMode(boolean selectMode, boolean selectAll) {
+    private void changeSelectMode(boolean selectMode, boolean selectAll) {
         this.isSelectMode = selectMode;
 
         if (selectMode) { // 当前为选择模式, 那么是否全选根据 selectAll 设置
@@ -470,7 +450,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
 
     @SuppressLint("SetTextI18n")
     private void renderView() {
-        if (viewType == 0) {// 网格
+        if (bind.dragLayout.getViewType() == 0) {// 网格
             if (isSelectMode) { // 网格才有选择模式
                 bind.sum.setText("已选" + selectedCount + "张");
             } else {
@@ -509,7 +489,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
         mPictureListAdapter.notifyDataSetChanged();
         mPictureAdapter.notifyDataSetChanged();
 
-        if (mPageIndex >= mPictures.size()) {
+        if (mPageIndex > mPictures.size() - 1) {
             mPageIndex = mPictures.size() - 1;
             if (mPageIndex < 0) { mPageIndex = 0; }
         }
@@ -520,63 +500,135 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
 
         this.renderView();
 
-        bind.smoothImageView.setCurrentIndex(bind.gridView, mPageIndex, R.id.image, 0);
+        // 由于列表数据变了, 所以需要重新初始化
+        if (mPictures.size() != 0) {
+            // 更新当前图片缩略图的位置信息
+            Rect bounds = SmoothImageView.getBounds(bind.gridView, mPageIndex, R.id.image);
+            bind.smoothImageView.setOriginalInfo(bounds, 0, 0);
+
+            // 更新 smoothImageView 显示的图片
+            bind.smoothImageView.setLoading(true);
+            mGlideRequests.load(mPictures.get(mPageIndex).getFilePath())
+                .apply(mThumbnailRequestOptions)
+                .error(R.drawable.ic_default_image_list)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e,
+                                                Object model,
+                                                Target<Drawable> target,
+                                                boolean isFirstResource) {
+                        bind.smoothImageView.setLoading(false);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource,
+                                                   Object model,
+                                                   Target<Drawable> target,
+                                                   DataSource dataSource,
+                                                   boolean isFirstResource) {
+                        bind.smoothImageView.setLoading(false);
+                        return false;
+                    }
+                })
+                .into(bind.smoothImageView);
+        }
     }
 
     /**
-     * 处理选中的文件
+     * 删除选中的文件
      */
     @SuppressLint("CheckResult")
     private void handlerSelected() {
-        if (nothingPictureSelected("处理选择项")) {
+        if (nothingPictureSelected("删除")) {
             return;
         }
 
         MessageDialog.show(this,
                            "提示",
-                           "处理这 [ " + selectedCount + " ] 个文件?",
+                           "删除这 [ " + selectedCount + " ] 个文件?",
                            "确定",
                            "取消")
             .setOnOkButtonClickListener((baseDialog, v) -> {
-                wakeLock();
                 Observable.create((ObservableOnSubscribe<Integer>) e -> {
-                    int i = 0;
-                    for (Picture picture : mPictures) {
-                        if (picture.isSelected()) {
-                            try {
-
-                            } catch (Exception exception) {
-                                e.onError(exception);
+                    try {
+                        int i = 0;
+                        Iterator<Picture> iterator = mPictures.iterator();
+                        while (iterator.hasNext()) {
+                            Picture next = iterator.next();
+                            if (next.isSelected()) {
+                                iterator.remove();
+                                e.onNext(++i);
                             }
-                            e.onNext(++i);
                         }
+                    } catch (Exception exception) {
+                        e.onError(exception);
                     }
                     e.onComplete();
                 })
                     .compose(bindUntilEvent(ActivityEvent.DESTROY))
                     .subscribeOn(Schedulers.io())// 指定在这行代码之前的subscribe在io线程执行
                     .doOnSubscribe(disposable -> {
-                        mProgressDialog = WaitDialog.show(this, "正在处理...");
+                        mProgressDialog = WaitDialog.show(this, "正在删除...");
                     })//开始执行之前的准备工作
                     .subscribeOn(AndroidSchedulers.mainThread())//指定 前面的doOnSubscribe 在主线程执行
-                    .observeOn(AndroidSchedulers.mainThread())//指定这行代码之后的subscribe在io线程执行
+                    .observeOn(AndroidSchedulers.mainThread())//指定这行代码之后的subscribe在主线程执行
                     .subscribe(progress -> mProgressDialog.setMessage(progress + "/" + selectedCount),
                                throwable -> {
-                                   unWakeLock();
                                    TipDialog.dismiss();
-                                   MessageDialog.show(this, "提示", "处理失败", "确定")
+                                   MessageDialog.show(this, "提示", "删除失败", "确定")
                                        .setCancelable(false)
                                        .setOnOkButtonClickListener((dialog, view) -> false);
                                    updateGridAndViewPager();
                                    Timber.e(throwable);
                                },
                                () -> {
-                                   unWakeLock();
                                    TipDialog.dismiss();
                                    updateGridAndViewPager();
-                                   MessageDialog.show(this, "提示", "处理成功", "确定")
+                                   MessageDialog.show(this, "提示", "删除成功", "确定")
                                        .setCancelable(false)
                                        .setOnOkButtonClickListener((dailog, view) -> false);
+                               });
+                return false;
+            });
+    }
+
+    @SuppressLint("CheckResult")
+    private void handlerCurrent() {
+        if (mPictures.size() == 0) {
+            TipDialog.show(this, "没得删了!", TipDialog.TYPE.SUCCESS);
+            return;
+        }
+        MessageDialog.show(this, "提示", "删除这个文件?", "确定", "取消")
+            .setOnOkButtonClickListener((baseDialog, v) -> {
+                Observable.create((ObservableOnSubscribe<Integer>) e -> {
+                    try {
+                        mPictures.remove(bind.pager.getCurrentItem());
+                    } catch (Exception exception) {
+                        e.onError(exception);
+                    }
+                    e.onNext(0);
+                    e.onComplete();
+                })
+                    .compose(bindUntilEvent(ActivityEvent.DESTROY))
+                    .subscribeOn(Schedulers.io())// 指定在这行代码之前的subscribe在io线程执行
+                    .doOnSubscribe(disposable -> {
+                        mProgressDialog = WaitDialog.show(this, "正在删除...");
+                    })//开始执行之前的准备工作
+                    .subscribeOn(AndroidSchedulers.mainThread())//指定 前面的doOnSubscribe 在主线程执行
+                    .observeOn(AndroidSchedulers.mainThread())//指定这行代码之后的subscribe在主线程执行
+                    .subscribe(progress -> {
+                                   // TipDialog.dismiss();
+                                   TipDialog.show(this, "删除成功!", TipDialog.TYPE.SUCCESS);
+                                   updateGridAndViewPager();
+                               },
+                               throwable -> {
+                                   TipDialog.dismiss();
+                                   MessageDialog.show(this, "提示", "删除失败", "确定")
+                                       .setCancelable(false)
+                                       .setOnOkButtonClickListener((dialog, view) -> false);
+                                   updateGridAndViewPager();
+                                   Timber.e(throwable);
                                });
                 return false;
             });
@@ -647,20 +699,14 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
      * @return .
      */
     private String getRandomImage(String content) {
-        //红色
-        String red;
-        //绿色
-        String green;
-        //蓝色
-        String blue;
         //生成随机对象
         Random random = new Random();
         //生成红色颜色代码
-        red = Integer.toHexString(random.nextInt(256)).toUpperCase();
+        String red = Integer.toHexString(random.nextInt(256)).toUpperCase();
         //生成绿色颜色代码
-        green = Integer.toHexString(random.nextInt(256)).toUpperCase();
+        String green = Integer.toHexString(random.nextInt(256)).toUpperCase();
         //生成蓝色颜色代码
-        blue = Integer.toHexString(random.nextInt(256)).toUpperCase();
+        String blue = Integer.toHexString(random.nextInt(256)).toUpperCase();
 
         //判断红色代码的位数
         red = red.length() == 1 ? "0" + red : red;
@@ -686,29 +732,6 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             + content;*/
     }
 
-    /**
-     * 阻止休眠
-     */
-    private void wakeLock() {
-        // 阻止休眠
-        Window win = getWindow();
-        WindowManager.LayoutParams params = win.getAttributes();
-        params.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-        params.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-        params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-        win.setAttributes(params);
-    }
-
-    private void unWakeLock() {
-        // 阻止休眠
-        Window win = getWindow();
-        WindowManager.LayoutParams params = win.getAttributes();
-        params.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-        params.flags &= ~WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-        params.flags &= ~WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-        win.setAttributes(params);
-    }
-
     private void toolbarInAnimation() {
         if (bind.toolbar.getVisibility() == View.VISIBLE) {
             return;
@@ -720,7 +743,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             .init();
 
         TranslateAnimation translateAnimation =
-            new TranslateAnimation(0, 0, -bind.toolbar.getHeight() + tintManager.getConfig().getStatusBarHeight(), 0);
+            new TranslateAnimation(0, 0, -bind.toolbar.getHeight() + ImmersionBar.getStatusBarHeight(this), 0);
         AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
         AnimationSet animationSet = new AnimationSet(true);
         animationSet.addAnimation(translateAnimation);
@@ -751,7 +774,7 @@ public class PictureActivity extends BaseActivity implements Toolbar.OnMenuItemC
             .init();
 
         TranslateAnimation translateAnimation =
-            new TranslateAnimation(0, 0, 0, -bind.toolbar.getHeight() + tintManager.getConfig().getStatusBarHeight());
+            new TranslateAnimation(0, 0, 0, -bind.toolbar.getHeight() + ImmersionBar.getStatusBarHeight(this));
         AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
         AnimationSet animationSet = new AnimationSet(true);
         animationSet.addAnimation(translateAnimation);

@@ -44,7 +44,7 @@ public class PictureAdapter extends PagerAdapter {
     @Override
     public View instantiateItem(ViewGroup container, int position) {
         DragFrameLayout layout = new DragFrameLayout(container.getContext());
-        layout.setContainer(mActivity.bind.pager);
+        layout.setViewPager(mActivity.bind.pager);
         layout.setImageView(mActivity.bind.smoothImageView);
 
         PhotoView photoView = new PhotoView(container.getContext());
