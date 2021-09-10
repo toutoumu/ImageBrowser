@@ -56,7 +56,7 @@ public class PictureAdapter2 extends RecyclerView.Adapter<PictureAdapter2.Horizo
             .load(pictures.get(position).getFilePath())
             .thumbnail(thumbnailRequest)
             // 必须设置占位图, 否则缩略图,未加载之前(imageView没有设置图片之前),无法拖动
-            .placeholder(R.drawable.transparent_drawable)
+            // .placeholder(R.drawable.transparent_drawable)
             .error(R.drawable.ic_default_image_list)
             .override(3968, 3968)
             .apply(mRequestOptions)

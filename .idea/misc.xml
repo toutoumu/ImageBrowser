@@ -5,6 +5,7 @@
       <map>
         <entry key="app/src/main/res/drawable/transparent_drawable.xml" value="0.29444444444444445" />
         <entry key="app/src/main/res/layout/activity_picture.xml" value="0.3098958333333333" />
+        <entry key="app/src/main/res/layout/item_image.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/item_photo.xml" value="0.1" />
       </map>
     </option>
